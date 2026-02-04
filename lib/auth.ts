@@ -1,0 +1,31 @@
+
+type LoginResponse =
+  | {
+      success: true;
+      user: {
+        id: number;
+        username: string;
+        email: string;
+        roles: string[];
+      };
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
+export async function login(username: string, password: string) {
+  const res = await fetch("https://balkangamehub.com/wp-json/bgh/v1/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Login failed (${res.status})`);
+  }
+
+  return res.json() as Promise<LoginResponse>;
+}
