@@ -1,6 +1,15 @@
-# Welcome to your Expo app 👋
+# WP Mobile Client
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native (Expo) mobile client for WordPress using a custom REST API.
+
+## Features
+
+- Expo Router navigation
+- WordPress authentication via REST
+- Posts listing
+- Clean API abstraction
+
+Work in progress.
 
 ## Get started
 
