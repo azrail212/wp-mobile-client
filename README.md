@@ -1,6 +1,7 @@
 # WP Mobile Client
 
 A **React Native (Expo)** mobile client for WordPress using a **custom REST API**.
+A custom mobile client for WordPress using React, consuming and extending the WordPress REST API to manage posts and users with role-based authentication and secure editing workflows.
 
 This project demonstrates how to build a real mobile client for WordPress using:
 

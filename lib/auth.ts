@@ -1,7 +1,8 @@
-
+import { saveToken } from "./token";
 type LoginResponse =
   | {
       success: true;
+      token: string;
       user: {
         id: number;
         username: string;
@@ -27,5 +28,10 @@ export async function login(username: string, password: string) {
     throw new Error(`Login failed (${res.status})`);
   }
 
-  return res.json() as Promise<LoginResponse>;
+  const data = (await res.json()) as LoginResponse;
+  if (data.success) {
+    await saveToken(data.token);
+  }
+
+  return data;
 }
