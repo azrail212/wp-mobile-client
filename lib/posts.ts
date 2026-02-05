@@ -13,3 +13,7 @@ export type Post = {
 export function fetchPosts() {
   return apiGet<Post[]>("/wp/v2/posts");
 }
+
+export function stripHtml(html: string) {
+  return html.replace(/<[^>]+>/g, "").trim();
+}

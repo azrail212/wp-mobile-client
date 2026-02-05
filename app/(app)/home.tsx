@@ -1,8 +1,9 @@
+import PostCard from "@/components/PostCard";
 import Screen from "@/components/Screen";
-import { fetchPosts, Post } from "@/lib/posts";
+import { fetchPosts, Post, stripHtml } from "@/lib/posts";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Button, FlatList, Text } from "react-native";
+import { ActivityIndicator, Button, FlatList } from "react-native";
 
 export default function Home() {
   const router = useRouter();
@@ -30,13 +31,17 @@ export default function Home() {
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id.toString()}
-        ItemSeparatorComponent={() => (
-          <Text style={{ marginVertical: 8 }}></Text>
-        )}
         renderItem={({ item }) => (
-          <Text style={{ fontSize: 16, fontWeight: "500" }}>
-            {item.title.rendered}
-          </Text>
+          <PostCard
+            title={item.title.rendered}
+            excerpt={stripHtml(item.excerpt.rendered)}
+            onPress={() =>
+              router.push({
+                pathname: "/post/[id]",
+                params: { id: String(item.id) },
+              })
+            }
+          />
         )}
       ></FlatList>
       <Button title="Go to Debug" onPress={() => router.push("/(app)/debug")} />
