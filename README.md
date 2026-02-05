@@ -1,30 +1,76 @@
 # WP Mobile Client
 
-A React Native (Expo) mobile client for WordPress using a custom REST API.
+A **React Native (Expo)** mobile client for WordPress using a **custom REST API**.
+
+This project demonstrates how to build a real mobile client for WordPress using:
+
+- Expo Router
+- JWT authentication
+- A restricted backend API layer
+
+---
 
 ## Features
 
-- Expo Router navigation
-- WordPress authentication via REST
-- Posts listing
+- Expo Router (file‑based navigation)
+- Tab‑based app navigation
+- WordPress authentication via REST (JWT)
+- Posts feed
+- Post detail screen
 - Clean API abstraction
 
-Work in progress.
+---
 
-## Backend
+## Architecture
 
-This app works with a custom WordPress REST API: https://github.com/azrail212/wp-mobile-client-plugin
+### Mobile
 
-## Get started
+- React Native + Expo
+- Expo Router
+- Secure token storage
 
-1. Install dependencies
+### Backend
 
-   ```bash
-   npm install
-   ```
+- Custom WordPress plugin
+- `/bgh/v1` REST namespace
+- JWT‑based authentication
 
-2. Start the app
+Backend repo:
+👉 https://github.com/azrail212/wp-mobile-client-plugin
 
-   ```bash
-   npx expo start
-   ```
+---
+
+## Project Structure
+
+```
+app/
+components/
+lib/
+```
+
+- `app/` – routing and screens
+- `components/` – reusable UI
+- `lib/` – API and business logic
+
+---
+
+## Getting Started
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Start the app
+
+```bash
+npx expo start
+```
+
+---
+
+## Status
+
+🚧 Work in progress  
+This project is built incrementally to demonstrate clean architecture and learning‑friendly progression.
