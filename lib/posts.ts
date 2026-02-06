@@ -11,13 +11,19 @@ export type Post = {
   content: {
     rendered: string;
   };
+  featuredMedia: number;
+  _embedded?: {
+    "wp:featuredmedia"?: Array<{
+      source_url: string;
+    }>;
+  };
 };
 
 export function fetchPosts() {
-  return apiGet<Post[]>("/wp/v2/posts");
+  return apiGet<Post[]>("/wp/v2/posts?_embed");
 }
 export function fetchPost(id: number) {
-  return apiGet<Post>(`/wp/v2/posts/${id}`);
+  return apiGet<Post>(`/wp/v2/posts/${id}?_embed`);
 }
 
 export function stripHtml(html: string) {

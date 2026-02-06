@@ -1,9 +1,8 @@
 import PostCard from "@/components/PostCard";
-import Screen from "@/components/Screen";
 import { fetchPosts, Post, stripHtml } from "@/lib/posts";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Button, FlatList } from "react-native";
+import { ActivityIndicator, FlatList, View } from "react-native";
 
 export default function Home() {
   const router = useRouter();
@@ -16,25 +15,23 @@ export default function Home() {
       .then(setPosts)
       .catch(console.error)
       .finally(() => setLoading(false));
-  });
+  }, []);
 
   if (loading) {
-    return (
-      <Screen>
-        <ActivityIndicator />
-      </Screen>
-    );
+    return <ActivityIndicator />;
   }
 
   return (
-    <Screen>
+    <View style={{ padding: 10, paddingTop: 60 }}>
       <FlatList
+        showsVerticalScrollIndicator={false}
         data={posts}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <PostCard
             title={item.title.rendered}
             excerpt={stripHtml(item.excerpt.rendered)}
+            image={item._embedded?.["wp:featuredmedia"]?.[0]?.source_url}
             onPress={() =>
               router.push({
                 pathname: "/post/[id]",
@@ -44,7 +41,6 @@ export default function Home() {
           />
         )}
       ></FlatList>
-      <Button title="Go to Debug" onPress={() => router.push("/(app)/debug")} />
-    </Screen>
+    </View>
   );
 }

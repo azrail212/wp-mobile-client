@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { apiGet } from "./api";
 import { deleteToken, getToken } from "./token";
 
@@ -9,10 +9,16 @@ type User = {
   roles: string[];
 };
 
+type LoginResult =
+  | { success: true; user: User }
+  | { success: false; message: string };
+
 type AuthState = {
   user: User | null;
   loading: boolean;
+  login: (username: string, password: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
+  refreshMe: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
@@ -22,31 +28,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    validate();
-    // Re-validate token every 30 seconds to catch expiration
-    const interval = setInterval(validate, 30000);
+    refreshMe().finally(() => setLoading(false));
+
+    const interval = setInterval(() => {
+      refreshMe().catch(() => {});
+    }, 600000);
     return () => clearInterval(interval);
   }, []);
 
-  async function validate() {
+  async function refreshMe() {
     const token = await getToken();
-
     if (!token) {
-      setLoading(false);
+      setUser(null);
       return;
     }
 
     try {
       const me = await apiGet<User>("/bgh/v1/me");
       setUser(me);
-      console.log("[Auth] Token is valid, user:", me.username);
-    } catch (error) {
-      // Token invalid or expired
-      console.log("[Auth] Token validation failed, logging out:", error);
+    } catch {
       await deleteToken();
       setUser(null);
-    } finally {
-      setLoading(false);
+      throw new Error("Session expired");
+    }
+  }
+  async function login(
+    username: string,
+    password: string,
+  ): Promise<LoginResult> {
+    // keep your existing endpoint contract
+    const res = await fetch("https://balkangamehub.com/wp-json/bgh/v1/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (!res.ok) {
+      return { success: false, message: `Login failed (${res.status})` };
+    }
+
+    const data = await res.json();
+
+    if (!data?.success || !data?.token) {
+      return {
+        success: false,
+        message: data?.message ?? "Invalid login response",
+      };
+    }
+
+    // Save token
+    const { saveToken } = await import("./token");
+    await saveToken(data.token);
+
+    // Immediately set user (use response if present, otherwise fetch /me)
+    if (data.user?.id) {
+      setUser(data.user);
+      return { success: true, user: data.user as User };
+    }
+
+    try {
+      await refreshMe();
+      const me = await apiGet<User>("/bgh/v1/me");
+      return { success: true, user: me };
+    } catch {
+      return {
+        success: false,
+        message: "Logged in, but failed to load profile",
+      };
     }
   }
 
@@ -55,17 +103,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }
 
-  return (
-    <AuthContext.Provider value={{ user, loading, logout }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ user, loading, login, logout, refreshMe }),
+    [user, loading],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }

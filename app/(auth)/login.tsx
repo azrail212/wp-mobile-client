@@ -1,4 +1,4 @@
-import { login } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Button, Text, TextInput, View } from "react-native";
@@ -14,6 +14,7 @@ export default function Login() {
     setStatus("Logging in...");
 
     try {
+      const { login } = useAuth();
       const res = await login(username, password);
 
       if (!res.success) {
@@ -22,7 +23,7 @@ export default function Login() {
       }
 
       setStatus(`Welcome ${res.user.username}`);
-      router.replace("/(app)/home");
+      router.replace("/(app)/(tabs)/home");
     } catch (e: any) {
       setStatus(e.message);
     }
